@@ -46,7 +46,9 @@ public class Action2 {
         File[] files = folder.listFiles();
         assert files != null;
         for (File file : files) {
-            if (file.getName().contains("mp3")) {
+            if (file.getName().contains("mp3")
+//                    || file.getName().contains("ncm")
+            ) {
                 songs.add(file);
             }
         }

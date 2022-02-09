@@ -15,7 +15,7 @@ public class MusicPlayer {
 
     private List<String> on;
     private List<String> songs;
-    private Map<String, File> map = new HashMap<>();
+    private final Map<String, File> map = new HashMap<>();
     private boolean flag;
     private int cs = 0;
     private int end = 0;
@@ -28,16 +28,12 @@ public class MusicPlayer {
             map.put(file.getName(), file);
         }
         on = new ArrayList<>(songs);
-        onByOrder();
+        onByRandom();
     }
 
     private void play() {
         if (end != 1) {
-            try {
-                playMp3(map.get(on.get(cs)));
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
+            playMp3(map.get(on.get(cs)));
         }
     }
 
@@ -116,32 +112,37 @@ public class MusicPlayer {
         flag = false;
     }
 
-    public void playMp3(File file) throws Throwable {
+    public void playMp3(File file) {
         flag = true;
         pre = false;
         end = 1;
         System.out.println("当前播放歌曲：" + file.getName());
-        MpegAudioFileReader reader = new MpegAudioFileReader();
-        AudioInputStream audioInputStream = reader.getAudioInputStream(file);
-        AudioFormat audioFormat = audioInputStream.getFormat();
-        AudioFormat pcmFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, audioFormat.getSampleRate(),
-                16, audioFormat.getChannels(), audioFormat.getChannels() * 2, audioFormat.getSampleRate(), false);
-        audioInputStream = AudioSystem.getAudioInputStream(pcmFormat, audioInputStream);
-        AudioFormat target = audioInputStream.getFormat();
-        DataLine.Info dInfo = new DataLine.Info(SourceDataLine.class, target, AudioSystem.NOT_SPECIFIED);
-        int len;
-        SourceDataLine line = (SourceDataLine) AudioSystem.getLine(dInfo);
-        line.open(target);
-        line.start();
-        byte[] buffer = new byte[1024];
-        while ((len = audioInputStream.read(buffer)) > 0 && flag) {
-            line.write(buffer, 0, len);
+        try {
+
+            MpegAudioFileReader reader = new MpegAudioFileReader();
+            AudioInputStream audioInputStream = reader.getAudioInputStream(file);
+            AudioFormat audioFormat = audioInputStream.getFormat();
+            AudioFormat pcmFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, audioFormat.getSampleRate(),
+                    16, audioFormat.getChannels(), audioFormat.getChannels() * 2, audioFormat.getSampleRate(), false);
+            audioInputStream = AudioSystem.getAudioInputStream(pcmFormat, audioInputStream);
+            AudioFormat target = audioInputStream.getFormat();
+            DataLine.Info dInfo = new DataLine.Info(SourceDataLine.class, target, AudioSystem.NOT_SPECIFIED);
+            int len;
+            SourceDataLine line = (SourceDataLine) AudioSystem.getLine(dInfo);
+            line.open(target);
+            line.start();
+            byte[] buffer = new byte[1024];
+            while ((len = audioInputStream.read(buffer)) > 0 && flag) {
+                line.write(buffer, 0, len);
+            }
+            end = 2;
+            line.drain();
+            line.stop();
+            line.close();
+            audioInputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        end = 2;
-        line.drain();
-        line.stop();
-        line.close();
-        audioInputStream.close();
         if (!pre) {
             next();
         } else {
