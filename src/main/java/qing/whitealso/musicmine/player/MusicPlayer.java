@@ -32,7 +32,7 @@ public class MusicPlayer {
     private int end = 0;
     // 切换上一首标志
     private boolean pre = false;
-    private int dur;
+    // 进度条睡眠时间
     private int sleepDur;
 
     public void play(List<File> files) {
@@ -139,11 +139,10 @@ public class MusicPlayer {
         flag = true;
         pre = false;
         end = 1;
-        dur = getSongDuration(file);
+        int dur = getSongDuration(file);
         sleepDur = dur * 10;
         System.out.println("当前播放歌曲：" + file.getName() + " 时长：" + dur);
         try {
-
             MpegAudioFileReader reader = new MpegAudioFileReader();
             AudioInputStream audioInputStream = reader.getAudioInputStream(file);
             AudioFormat audioFormat = audioInputStream.getFormat();
@@ -156,13 +155,13 @@ public class MusicPlayer {
             SourceDataLine line = (SourceDataLine) AudioSystem.getLine(dInfo);
             line.open(target);
             line.start();
-            ProgressThread progressThread = new ProgressThread();
-            progressThread.start();
+//            ProgressThread progressThread = new ProgressThread();
+//            progressThread.start();
             byte[] buffer = new byte[1024];
             while ((len = audioInputStream.read(buffer)) > 0 && flag) {
                 line.write(buffer, 0, len);
             }
-            progressThread.interrupt();
+//            progressThread.interrupt();
             end = 2;
             line.drain();
             line.stop();
