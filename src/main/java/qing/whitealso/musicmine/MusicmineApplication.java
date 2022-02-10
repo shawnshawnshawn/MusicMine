@@ -13,9 +13,7 @@ public class MusicmineApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(MusicmineApplication.class, args);
-         MusicPlayer player = new MusicPlayer();
-         List<File> files= Action2.openPlayFolder("/Users/whitealso/Music/网易云音乐");
-         player.play(files);
+        Action2.start();
     }
 
 }

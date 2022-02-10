@@ -2,12 +2,17 @@ package qing.whitealso.musicmine.player;
 
 import com.alibaba.fastjson.JSON;
 import javazoom.spi.mpeg.sampled.file.MpegAudioFileReader;
+import lombok.SneakyThrows;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.audio.mp3.MP3AudioHeader;
+import org.jaudiotagger.audio.mp3.MP3File;
 
 import javax.sound.sampled.*;
 import java.io.File;
 import java.util.*;
 
 /**
+ * 进度条线程会占用控制台，导致输入指令不可用
  * @author baiye
  * @since 2022/2/9 1:47 下午
  **/
@@ -27,6 +32,8 @@ public class MusicPlayer {
     private int end = 0;
     // 切换上一首标志
     private boolean pre = false;
+    private int dur;
+    private int sleepDur;
 
     public void play(List<File> files) {
         songs = new HashSet<>(files.size());
@@ -132,7 +139,9 @@ public class MusicPlayer {
         flag = true;
         pre = false;
         end = 1;
-        System.out.println("当前播放歌曲：" + file.getName());
+        dur = getSongDuration(file);
+        sleepDur = dur * 10;
+        System.out.println("当前播放歌曲：" + file.getName() + " 时长：" + dur);
         try {
 
             MpegAudioFileReader reader = new MpegAudioFileReader();
@@ -147,10 +156,13 @@ public class MusicPlayer {
             SourceDataLine line = (SourceDataLine) AudioSystem.getLine(dInfo);
             line.open(target);
             line.start();
+            ProgressThread progressThread = new ProgressThread();
+            progressThread.start();
             byte[] buffer = new byte[1024];
             while ((len = audioInputStream.read(buffer)) > 0 && flag) {
                 line.write(buffer, 0, len);
             }
+            progressThread.interrupt();
             end = 2;
             line.drain();
             line.stop();
@@ -166,11 +178,27 @@ public class MusicPlayer {
         }
     }
 
+    @SneakyThrows
+    private int getSongDuration(File file) {
+        MP3File mp3File = (MP3File) AudioFileIO.read(file);
+        MP3AudioHeader audioHeader = (MP3AudioHeader) mp3File.getAudioHeader();
+        return audioHeader.getTrackLength();
+    }
+
     private String arrayStr() {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < on.size(); i++) {
             str.append("\n").append(i).append(". ").append(on.get(i));
         }
         return str.toString();
+    }
+
+    class ProgressThread extends Thread {
+        @SneakyThrows
+        @Override
+        public void run() {
+            ProgressBar progressBar = ProgressBar.build(0, 1, "歌曲进度: ", 100, sleepDur);
+            progressBar.printProgress();
+        }
     }
 }

@@ -19,6 +19,10 @@ public class Action2 {
     static List<File> files;
 
     public static void main(String[] args) {
+       start();
+    }
+
+    public static void start() {
         files = openPlayFolder("/Users/whitealso/Music/网易云音乐");
         PlayThread thread = new PlayThread();
         thread.start();
