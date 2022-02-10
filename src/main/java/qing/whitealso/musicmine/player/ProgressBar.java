@@ -110,7 +110,7 @@ public class ProgressBar {
      * 进度+1
      */
     public void process() {
-        checkStatus();
+        if (hasFinished) return;
         checkInit();
         cleanProcessBar();
         index++;
@@ -223,12 +223,11 @@ public class ProgressBar {
     public void printProgress() {
         init();
         do {
+            process();
             try {
                 TimeUnit.MILLISECONDS.sleep(sleepDur);
             } catch (Exception e) {
-
             }
-            process();
         } while (index <= barLength);
         System.out.println();
     }
