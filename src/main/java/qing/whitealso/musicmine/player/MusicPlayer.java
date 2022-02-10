@@ -13,22 +13,38 @@ import java.util.*;
  **/
 public class MusicPlayer {
 
+    // 播放列表
     private List<String> on;
-    private List<String> songs;
+    // 歌曲列表
+    private Set<String> songs;
+    // 歌曲缓存
     private final Map<String, File> map = new HashMap<>();
+    // 歌曲结束标志
     private boolean flag;
+    // 当前播放歌曲索引
     private int cs = 0;
+    // 播放状态 0：未播放歌曲；1：正在播放歌曲；2：歌曲播放结束
     private int end = 0;
+    // 切换上一首标志
     private boolean pre = false;
 
     public void play(List<File> files) {
-        songs = new ArrayList<>(files.size());
+        songs = new HashSet<>(files.size());
         for (File file : files) {
             songs.add(file.getName());
             map.put(file.getName(), file);
         }
         on = new ArrayList<>(songs);
         onByRandom();
+    }
+
+    public void add(List<File> files) {
+        for (File file : files) {
+            songs.add(file.getName());
+            map.put(file.getName(), file);
+            on.add(file.getName());
+        }
+        System.out.println("更新播放列表：" + JSON.toJSONString(songs));
     }
 
     private void play() {
@@ -45,13 +61,13 @@ public class MusicPlayer {
         String songName = on.get(cs);
         find(songName);
         on = new ArrayList<>(songs);
-        System.out.println("顺序播放列表：" + JSON.toJSONString(on));
+        System.out.println("顺序播放列表：" + arrayStr());
         play();
     }
 
     // 随机播放
     public void onByRandom() {
-        if (!on.isEmpty()) {
+        if (!on.isEmpty() && end != 0) {
             String songName = on.get(cs);
             random();
             find(songName);
@@ -61,7 +77,7 @@ public class MusicPlayer {
             Random random = new Random();
             cs = random.nextInt(len);
         }
-        System.out.println("随机播放列表：" + JSON.toJSONString(on));
+        System.out.println("随机播放列表：" + arrayStr());
         play();
     }
 
@@ -148,5 +164,13 @@ public class MusicPlayer {
         } else {
             last();
         }
+    }
+
+    private String arrayStr() {
+        StringBuilder str = new StringBuilder();
+        for (int i = 0; i < on.size(); i++) {
+            str.append("\n").append(i).append(". ").append(on.get(i));
+        }
+        return str.toString();
     }
 }

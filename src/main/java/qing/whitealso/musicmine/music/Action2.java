@@ -1,11 +1,13 @@
 package qing.whitealso.musicmine.music;
 
+import lombok.SneakyThrows;
 import qing.whitealso.musicmine.player.MusicPlayer;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author baiye
@@ -20,6 +22,8 @@ public class Action2 {
         files = openPlayFolder("/Users/whitealso/Music/网易云音乐");
         PlayThread thread = new PlayThread();
         thread.start();
+//        FlashThread flashThread = new FlashThread();
+//        flashThread.start();
         while (true) {
             Scanner scanner = new Scanner(System.in);
             String next = scanner.next();
@@ -28,7 +32,7 @@ public class Action2 {
                     thread.next();
                     break;
                 case "pr":
-                    thread.pre();
+                    thread.last();
                     break;
                 case "order":
                     thread.order();
@@ -65,7 +69,7 @@ public class Action2 {
             player.stop();
         }
 
-        public void pre() {
+        public void last() {
             player.pre();
         }
 
@@ -75,6 +79,18 @@ public class Action2 {
 
         public void random() {
             player.onByRandom();
+        }
+    }
+
+    static class FlashThread extends  Thread {
+        @SneakyThrows
+        @Override
+        public void run() {
+            while (true) {
+                List<File> files = openPlayFolder("/Users/whitealso/Music/网易云音乐");
+                player.add(files);
+                TimeUnit.SECONDS.sleep(5);
+            }
         }
     }
 }
