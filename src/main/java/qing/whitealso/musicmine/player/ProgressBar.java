@@ -155,13 +155,11 @@ public class ProgressBar {
      * 绘制进度条
      */
     public void drawProgressBar() {
-        System.out.print(
-                String.format(
-                        "%3d%%├%s%s┤",
-                        index,
-                        genProcess(index / step),
-                        genWaitProcess(barLength / step - index / step)
-                )
+        System.out.printf(
+                "%3d%%├%s%s┤",
+                index,
+                genProcess(index / step),
+                genWaitProcess(barLength / step - index / step)
         );
     }
 
@@ -192,7 +190,6 @@ public class ProgressBar {
     /**
      * 是否已经完成进度条
      *
-     * @return
      */
     public boolean hasFinished() {
         return index >= barLength;
@@ -204,7 +201,7 @@ public class ProgressBar {
     private void init() {
         checkStatus();
         System.out.print(title);
-        System.out.print(String.format("%3d%%[%s%s]", index, genProcess(index / step), genWaitProcess(barLength / step - index / step)));
+        System.out.printf("%3d%%[%s%s]", index, genProcess(index / step), genWaitProcess(barLength / step - index / step));
         hasInited = true;
     }
 
@@ -226,8 +223,7 @@ public class ProgressBar {
             process();
             try {
                 TimeUnit.MILLISECONDS.sleep(sleepDur);
-            } catch (Exception e) {
-            }
+            } catch (Exception ignored){}
         } while (index <= barLength);
         System.out.println();
     }
